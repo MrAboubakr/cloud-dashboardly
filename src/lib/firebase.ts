@@ -1,7 +1,9 @@
 
-// This is a placeholder for Firebase configuration
-// In a real project, you would add your Firebase config here
+import { initializeApp } from 'firebase/app';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
+// Firebase configuration
 export const firebaseConfig = {
   apiKey: "your-api-key",
   authDomain: "your-auth-domain",
@@ -11,11 +13,15 @@ export const firebaseConfig = {
   appId: "your-app-id"
 };
 
-// In a real implementation, you would initialize Firebase here:
-// import { initializeApp } from 'firebase/app';
-// import { getAuth } from 'firebase/auth';
-// import { getFirestore } from 'firebase/firestore';
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
-// const app = initializeApp(firebaseConfig);
-// export const auth = getAuth(app);
-// export const db = getFirestore(app);
+// Initialize Firebase services
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const googleProvider = new GoogleAuthProvider();
+
+// Configure Google Auth Provider
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
