@@ -38,23 +38,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Listen for authentication state changes
   useEffect(() => {
+    console.log("Setting up auth state listener");
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setLoading(true);
       if (firebaseUser) {
+        console.log("User is authenticated:", firebaseUser.uid);
         // User is signed in, get additional user data from Firestore
-        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-        
-        if (userDoc.exists()) {
-          // User exists in Firestore
-          const userData = userDoc.data() as Omit<User, 'id'>;
-          setUser({
-            id: firebaseUser.uid,
-            name: userData.name || firebaseUser.displayName || 'User',
-            email: userData.email || firebaseUser.email || '',
-            role: userData.role || 'user'
-          });
-        } else {
-          // User doesn't exist in Firestore yet, just use Firebase auth data
+        try {
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          
+          if (userDoc.exists()) {
+            // User exists in Firestore
+            const userData = userDoc.data() as Omit<User, 'id'>;
+            setUser({
+              id: firebaseUser.uid,
+              name: userData.name || firebaseUser.displayName || 'User',
+              email: userData.email || firebaseUser.email || '',
+              role: userData.role || 'user'
+            });
+            console.log("User data retrieved from Firestore");
+          } else {
+            // User doesn't exist in Firestore yet, just use Firebase auth data
+            setUser({
+              id: firebaseUser.uid,
+              name: firebaseUser.displayName || 'User',
+              email: firebaseUser.email || '',
+              role: 'user'
+            });
+            console.log("User not found in Firestore, using auth data");
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          // Still set basic user info even if Firestore fails
           setUser({
             id: firebaseUser.uid,
             name: firebaseUser.displayName || 'User',
@@ -64,6 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         // User is signed out
+        console.log("No authenticated user");
         setUser(null);
       }
       setLoading(false);
@@ -75,27 +91,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Save user data to Firestore
   const saveUserToFirestore = async (firebaseUser: FirebaseUser, name: string = '') => {
-    const userRef = doc(db, 'users', firebaseUser.uid);
-    const userData = {
-      name: name || firebaseUser.displayName || 'User',
-      email: firebaseUser.email,
-      role: 'user',
-      createdAt: new Date().toISOString()
-    };
-    
-    await setDoc(userRef, userData, { merge: true });
-    return userData;
+    try {
+      const userRef = doc(db, 'users', firebaseUser.uid);
+      const userData = {
+        name: name || firebaseUser.displayName || 'User',
+        email: firebaseUser.email,
+        role: 'user',
+        createdAt: new Date().toISOString()
+      };
+      
+      await setDoc(userRef, userData, { merge: true });
+      console.log("User data saved to Firestore");
+      return userData;
+    } catch (error) {
+      console.error("Error saving user to Firestore:", error);
+      throw error;
+    }
   };
 
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
+      console.log("Attempting login with email:", email);
       const { user: firebaseUser } = await signInWithEmailAndPassword(auth, email, password);
+      console.log("Login successful for user:", firebaseUser.uid);
       toast.success('Logged in successfully');
       navigate('/dashboard');
     } catch (error: any) {
       console.error('Login error:', error);
-      toast.error(error.message || 'Login failed');
+      const errorMessage = error.code === 'auth/invalid-credential' 
+        ? 'Invalid email or password'
+        : error.message || 'Login failed';
+      toast.error(errorMessage);
       throw error;
     } finally {
       setLoading(false);
@@ -105,7 +132,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (name: string, email: string, password: string) => {
     try {
       setLoading(true);
+      console.log("Attempting signup with email:", email);
       const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password);
+      console.log("Signup successful for user:", firebaseUser.uid);
       
       // Save additional user info to Firestore
       await saveUserToFirestore(firebaseUser, name);
@@ -114,7 +143,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       navigate('/dashboard');
     } catch (error: any) {
       console.error('Signup error:', error);
-      toast.error(error.message || 'Signup failed');
+      let errorMessage = error.message || 'Signup failed';
+      
+      // More user-friendly error messages
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'This email is already in use';
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = 'Password should be at least 6 characters';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address';
+      } else if (error.code === 'auth/configuration-not-found') {
+        errorMessage = 'Firebase authentication is not properly configured';
+      }
+      
+      toast.error(errorMessage);
       throw error;
     } finally {
       setLoading(false);
@@ -124,7 +166,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginWithGoogle = async () => {
     try {
       setLoading(true);
+      console.log("Attempting Google login");
       const { user: firebaseUser } = await signInWithPopup(auth, googleProvider);
+      console.log("Google login successful for user:", firebaseUser.uid);
       
       // Check if it's a new user and save to Firestore if needed
       const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
@@ -136,7 +180,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       navigate('/dashboard');
     } catch (error: any) {
       console.error('Google login error:', error);
-      toast.error(error.message || 'Google login failed');
+      let errorMessage = error.message || 'Google login failed';
+      
+      // Provide more specific error messages
+      if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = 'Login canceled. Please try again.';
+      } else if (error.code === 'auth/configuration-not-found') {
+        errorMessage = 'Firebase authentication is not properly configured';
+      }
+      
+      toast.error(errorMessage);
       throw error;
     } finally {
       setLoading(false);
@@ -145,7 +198,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
+      console.log("Attempting logout");
       await signOut(auth);
+      console.log("Logout successful");
       toast.success('Logged out successfully');
       navigate('/');
     } catch (error: any) {
