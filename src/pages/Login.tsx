@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -7,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { FcGoogle } from 'react-icons/fc';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -26,7 +25,6 @@ const Login: React.FC = () => {
       setIsLoading(true);
       await login(email, password);
     } catch (error) {
-      // Error is already handled in the login function
       console.error('Login error in component:', error);
     } finally {
       setIsLoading(false);
@@ -38,7 +36,6 @@ const Login: React.FC = () => {
       setIsLoading(true);
       await loginWithGoogle();
     } catch (error) {
-      // Error is already handled in the loginWithGoogle function
       console.error('Google login error in component:', error);
     } finally {
       setIsLoading(false);

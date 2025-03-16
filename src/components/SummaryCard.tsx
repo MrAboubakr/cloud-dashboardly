@@ -5,18 +5,18 @@ import { cn } from '@/lib/utils';
 
 interface SummaryCardProps {
   title: string;
-  value: string | number;
+  metric: string;
   change?: string;
-  isPositiveChange?: boolean;
+  changeDirection?: 'up' | 'down';
   icon: React.ReactNode;
   delay?: number;
 }
 
 const SummaryCard: React.FC<SummaryCardProps> = ({
   title,
-  value,
+  metric,
   change,
-  isPositiveChange = true,
+  changeDirection = 'up',
   icon,
   delay = 0
 }) => {
@@ -33,13 +33,13 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
           <div>
             <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>
             <div className="flex items-baseline">
-              <h3 className="text-2xl font-bold tracking-tight">{value}</h3>
+              <h3 className="text-2xl font-bold tracking-tight">{metric}</h3>
               {change && (
                 <span className={cn(
                   "ml-2 text-sm font-medium",
-                  isPositiveChange ? "text-green-500" : "text-red-500"
+                  changeDirection === 'up' ? "text-green-500" : "text-red-500"
                 )}>
-                  {isPositiveChange ? '+' : ''}{change}
+                  {changeDirection === 'up' ? '+' : ''}{change}
                 </span>
               )}
             </div>

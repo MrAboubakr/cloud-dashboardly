@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import SummaryCard from '@/components/SummaryCard';
 import RevenueChart from '@/components/RevenueChart';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import ThemeToggle from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, DollarSign, CreditCard, Activity, LogOut } from 'lucide-react';
@@ -18,28 +18,28 @@ const Dashboard: React.FC = () => {
       title: "Total Page Views",
       metric: "1,234",
       icon: <Activity className="h-4 w-4 text-muted-foreground" />,
-      change: "+12.3%",
+      change: "12.3%",
       changeDirection: "up"
     },
     {
       title: "Total Revenue",
       metric: "$12,345",
       icon: <DollarSign className="h-4 w-4 text-muted-foreground" />,
-      change: "+32.1%",
+      change: "32.1%",
       changeDirection: "up"
     },
     {
       title: "Paying Users",
       metric: "123",
       icon: <CreditCard className="h-4 w-4 text-muted-foreground" />,
-      change: "+2.3%",
+      change: "2.3%",
       changeDirection: "up"
     },
     {
       title: "Total Signups",
       metric: "345",
       icon: <Users className="h-4 w-4 text-muted-foreground" />,
-      change: "+18.4%",
+      change: "18.4%",
       changeDirection: "up"
     }
   ];
