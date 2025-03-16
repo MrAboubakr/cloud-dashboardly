@@ -14,10 +14,10 @@ export const firebaseConfig = {
   measurementId: "G-YY9SPFZJDQ"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// ✅ Initialize Firebase (Avoid re-initialization in Next.js SSR)
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Firebase services
+// ✅ Export Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
