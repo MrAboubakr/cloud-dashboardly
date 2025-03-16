@@ -5,12 +5,13 @@ import { getFirestore } from 'firebase/firestore';
 
 // Firebase configuration
 export const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-auth-domain",
-  projectId: "your-project-id",
-  storageBucket: "your-storage-bucket",
-  messagingSenderId: "your-messaging-sender-id",
-  appId: "your-app-id"
+  apiKey: "AIzaSyCuON6e-68-x0gK26e71hapmiNM0HZqkgI",
+  authDomain: "speech-to-text-app-805fc.firebaseapp.com",
+  projectId: "speech-to-text-app-805fc",
+  storageBucket: "speech-to-text-app-805fc.firebasestorage.app",
+  messagingSenderId: "765706886456",
+  appId: "1:765706886456:web:220a59bacd6ba12f1f35cd",
+  measurementId: "G-YY9SPFZJDQ"
 };
 
 // Initialize Firebase
